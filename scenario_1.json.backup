@@ -1,0 +1,135 @@
+{
+  "templates": [
+    {
+      "name": "Spotify Icon",
+      "paths": [
+        "templates/spotify/taskbar_icon_spotify.png"
+      ],
+      "methods": [
+        "TM_CCOEFF_NORMED",
+        "TM_CCORR_NORMED",
+        "TM_SQDIFF_NORMED"
+      ],
+      "enabled": true,
+      "actions": [
+        {
+          "type": "move_mouse"
+        },
+        {
+          "type": "click",
+          "button": "left"
+        },
+        {
+          "type": "wait",
+          "seconds": 3.0
+        }
+      ]
+    },
+    {
+      "name": "Spotify Home",
+      "methods": [
+        "TM_CCOEFF_NORMED",
+        "TM_CCORR_NORMED",
+        "TM_SQDIFF_NORMED"
+      ],
+      "enabled": true,
+      "depends_on": "Spotify Icon",
+      "actions": [
+        {
+          "type": "move_mouse"
+        },
+        {
+          "type": "click",
+          "button": "left"
+        },
+        {
+          "type": "wait",
+          "seconds": 2.0
+        }
+      ],
+      "paths": [
+        "templates/spotify/icon_home_0.png",
+        "templates/spotify/icon_home_1.png"
+      ]
+    },
+    {
+      "name": "Liked Songs",
+      "methods": [
+        "TM_CCOEFF_NORMED",
+        "TM_SQDIFF_NORMED"
+      ],
+      "enabled": false,
+      "depends_on": "Spotify Home",
+      "actions": [
+        {
+          "type": "move_mouse"
+        },
+        {
+          "type": "click",
+          "button": "left"
+        },
+        {
+          "type": "wait",
+          "seconds": 2.0
+        }
+      ],
+      "paths": [
+        "templates/spotify/liked_songs.png"
+      ]
+    },
+    {
+      "name": "Play Icon",
+      "paths": [
+        "templates/spotify/play_button.png"
+      ],
+      "methods": [
+        "TM_CCOEFF_NORMED",
+        "TM_CCORR_NORMED",
+        "TM_SQDIFF_NORMED"
+      ],
+      "enabled": false,
+      "depends_on": "Liked Songs",
+      "actions": [
+        {
+          "type": "move_mouse"
+        },
+        {
+          "type": "click",
+          "button": "left"
+        },
+        {
+          "type": "wait",
+          "seconds": 2.0
+        }
+      ]
+    }
+  ],
+  "screenshot_interval": 10,
+  "max_loops": 1,
+  "visualizer_enabled": false,
+  "default_template_methods": [
+    "TM_CCOEFF_NORMED",
+    "TM_CCORR_NORMED",
+    "TM_SQDIFF_NORMED"
+  ],
+  "match_threshold": 0.75,
+  "match_distance_pixels_threshold": 50,
+  "show_failed_matches": true,
+  "process_one_template_per_iteration": false,
+  "monitor_settings": {
+    "enable_monitor_selection": true,
+    "default_monitor_index": 1
+  },
+  "action_settings": {
+    "smooth_mouse_movement": true,
+    "mouse_move_duration": 0.5,
+    "click_delay": 0.2,
+    "type_delay": 0.05,
+    "post_action_delay": 0.3,
+    "pyautogui_pause": 0.1,
+    "typing_method": "clipboard",
+    "hybrid_visibility_chars": 5
+  },
+  "font_color": "Black",
+  "appearance_mode": "Dark"
+}

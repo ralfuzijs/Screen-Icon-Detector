@@ -1,0 +1,120 @@
+{
+  "templates": [
+    {
+      "name": "Windows Search bar",
+      "methods": [
+        "TM_CCOEFF_NORMED",
+        "TM_CCORR_NORMED",
+        "TM_SQDIFF_NORMED"
+      ],
+      "enabled": true,
+      "actions": [
+        {
+          "type": "move_mouse"
+        },
+        {
+          "type": "click",
+          "button": "left"
+        },
+        {
+          "type": "type_message",
+          "message": "Settings"
+        },
+        {
+          "type": "wait",
+          "seconds": 1.0
+        },
+        {
+          "type": "press_key",
+          "key": "enter"
+        },
+        {
+          "type": "wait",
+          "seconds": 3.0
+        }
+      ],
+      "paths": [
+        "templates/windows_settings_update_check/icon_taskbar_search_bar.bmp"
+      ]
+    },
+    {
+      "name": "Windows update section",
+      "methods": [
+        "TM_CCOEFF_NORMED",
+        "TM_CCORR_NORMED",
+        "TM_SQDIFF_NORMED"
+      ],
+      "enabled": true,
+      "actions": [
+        {
+          "type": "move_mouse"
+        },
+        {
+          "type": "click",
+          "button": "left"
+        },
+        {
+          "type": "wait",
+          "seconds": 3.0
+        }
+      ],
+      "paths": [
+        "templates/windows_settings_update_check/icon_windows_settings_update.bmp"
+      ]
+    },
+    {
+      "name": "Check for Updates",
+      "methods": [
+        "TM_CCOEFF_NORMED",
+        "TM_CCORR_NORMED",
+        "TM_SQDIFF_NORMED"
+      ],
+      "enabled": true,
+      "actions": [
+        {
+          "type": "move_mouse"
+        },
+        {
+          "type": "click",
+          "button": "left"
+        },
+        {
+          "type": "wait",
+          "seconds": 3.0
+        }
+      ],
+      "paths": [
+        "templates/windows_settings_update_check/icon_windows_check_for_updates.bmp",
+        "templates/windows_settings_update_check/icon_windows_check_for_updates_2.png"
+      ]
+    }
+  ],
+  "screenshot_interval": 10,
+  "max_loops": 1,
+  "visualizer_enabled": false,
+  "default_template_methods": [
+    "TM_CCOEFF_NORMED",
+    "TM_CCORR_NORMED",
+    "TM_SQDIFF_NORMED"
+  ],
+  "match_threshold": 0.75,
+  "match_distance_pixels_threshold": 50,
+  "show_failed_matches": true,
+  "process_one_template_per_iteration": false,
+  "monitor_settings": {
+    "enable_monitor_selection": true,
+    "default_monitor_index": 1
+  },
+  "action_settings": {
+    "smooth_mouse_movement": true,
+    "mouse_move_duration": 0.5,
+    "click_delay": 0.2,
+    "type_delay": 0.05,
+    "post_action_delay": 0.3,
+    "pyautogui_pause": 0.1,
+    "typing_method": "clipboard",
+    "hybrid_visibility_chars": 5
+  },
+  "font_color": "Black",
+  "appearance_mode": "Dark"
+}
