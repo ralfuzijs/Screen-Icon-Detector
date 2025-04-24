@@ -3,8 +3,6 @@ import time
 import random
 import pyperclip  # Add this import for clipboard operations
 import sys
-import pandas as pd
-import os
 
 # Import the kill switch flag from main
 try:
@@ -202,62 +200,6 @@ class ActionPerformer:
             print(f"Error pressing key: {e}")
             return False
     
-    def handle_excel(self, file_path, sheet_name, column_name):
-        """Handle Excel file operations."""
-        try:
-            print(f"Excel action: Opening file {file_path}, sheet {sheet_name}, column {column_name}")
-            
-            # Check kill switch before potentially lengthy operation
-            if 'check_kill_switch' in globals():
-                check_kill_switch()
-            
-            # Try to find the file - check if it's a relative path
-            if not os.path.isabs(file_path):
-                # Try to find relative to the current working directory
-                abs_path = os.path.abspath(file_path)
-                if os.path.exists(abs_path):
-                    file_path = abs_path
-                else:
-                    # Try to find relative to the script directory
-                    script_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-                    abs_path = os.path.join(script_dir, file_path)
-                    if os.path.exists(abs_path):
-                        file_path = abs_path
-            
-            # Make sure the file exists
-            if not os.path.exists(file_path):
-                print(f"Error: Excel file not found: {file_path}")
-                return False
-            
-            # Load the Excel file
-            df = pd.read_excel(file_path, sheet_name=sheet_name)
-            
-            # Check if column exists
-            if column_name not in df.columns:
-                print(f"Error: Column {column_name} not found in sheet {sheet_name}")
-                return False
-            
-            # Get column values (for now we'll just print them, but you could do more)
-            column_values = df[column_name].tolist()
-            print(f"Found {len(column_values)} values in column {column_name}")
-            
-            # You could do more operations here, like:
-            # - Type specific values from the column
-            # - Update values in the column and save back to file
-            # - Use values to drive other actions
-            
-            # For demonstration, we'll type the first value if it exists
-            if len(column_values) > 0 and str(column_values[0]) != "nan":
-                first_value = str(column_values[0])
-                print(f"Typing first value from column: {first_value}")
-                self.type_message(first_value)
-            
-            return True
-            
-        except Exception as e:
-            print(f"Error handling Excel file: {e}")
-            return False
-
     def perform_action(self, action_type, params=None):
         """Perform an action based on the action type and parameters."""
         # Check kill switch before action
@@ -276,12 +218,6 @@ class ActionPerformer:
             return self.type_message(params)
         elif action_type == "press_key" and isinstance(params, str):
             return self.press_key(params)
-        elif action_type == "excel" and isinstance(params, dict):
-            return self.handle_excel(
-                params.get('file', ''),
-                params.get('sheet', ''),
-                params.get('column', '')
-            )
         else:
             print(f"Unknown action type or invalid parameters: {action_type}")
             return False

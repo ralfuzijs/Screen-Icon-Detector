@@ -4,9 +4,6 @@ Dialog for editing template actions.
 import tkinter as tk
 import customtkinter as ctk
 from tkinter import messagebox
-from tkinter import filedialog
-import pandas as pd
-import os
 
 class ActionEditor:
     def __init__(self, parent, action=None, action_index=None, callback=None):
@@ -45,7 +42,7 @@ class ActionEditor:
         
         self.action_types = [
             "move_mouse", "click", "double_click", "type_message", 
-            "press_key", "wait", "terminate_program", "excel"
+            "press_key", "wait", "terminate_program"
         ]
         
         # Get current type if editing existing action
@@ -99,37 +96,6 @@ class ActionEditor:
         
         cancel_btn = ctk.CTkButton(button_frame, text="Cancel", command=self.window.destroy)
         cancel_btn.pack(side="right", padx=10)
-    
-    def find_excel_file(self, file_path):
-        """
-        Find an Excel file by checking multiple locations.
-        Returns the valid file path if found, otherwise returns the original path.
-        """
-        # If absolute path and exists, return it
-        if os.path.isabs(file_path) and os.path.exists(file_path):
-            return file_path
-            
-        # Get project directory
-        project_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
-        
-        # Check relative to project root
-        abs_path = os.path.join(project_dir, file_path)
-        if os.path.exists(abs_path):
-            return abs_path
-            
-        # Check in excel_files folder
-        excel_folder_path = os.path.join(project_dir, "excel_files", os.path.basename(file_path))
-        if os.path.exists(excel_folder_path):
-            return excel_folder_path
-            
-        # If file contains path separators, try just the basename in excel_files
-        if os.path.dirname(file_path):
-            simple_path = os.path.join(project_dir, "excel_files", os.path.basename(file_path))
-            if os.path.exists(simple_path):
-                return simple_path
-                
-        # Return original if not found
-        return file_path
     
     def update_param_ui(self, action_type):
         """Update parameter UI based on selected action type."""
@@ -209,187 +175,7 @@ class ActionEditor:
                 text="This action will terminate the program when executed.\nNo additional parameters needed."
             )
             info_label.pack(anchor="w", padx=10, pady=20)
-        
-        elif action_type == "excel":
-            # Initialize variables for Excel action
-            self.excel_file_var = tk.StringVar(value=self.action.get("file", "") if self.action and "file" in self.action else "")
-            self.excel_sheet_var = tk.StringVar(value=self.action.get("sheet", "") if self.action and "sheet" in self.action else "")
-            self.excel_column_var = tk.StringVar(value=self.action.get("column", "") if self.action and "column" in self.action else "")
-            self.sheets_list = []
-            self.columns_list = []
-            
-            # File selection
-            file_frame = ctk.CTkFrame(self.param_frame)
-            file_frame.pack(fill="x", padx=10, pady=5)
-            
-            file_label = ctk.CTkLabel(file_frame, text="Excel File:")
-            file_label.pack(side="left", padx=5)
-            
-            file_entry = ctk.CTkEntry(file_frame, textvariable=self.excel_file_var, width=200)
-            file_entry.pack(side="left", padx=5, fill="x", expand=True)
-            
-            def browse_file():
-                # Get the path to the excel_files folder
-                project_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
-                excel_dir = os.path.join(project_dir, "excel_files")
-                
-                # Create the folder if it doesn't exist
-                if not os.path.exists(excel_dir):
-                    os.makedirs(excel_dir, exist_ok=True)
-                
-                file_path = filedialog.askopenfilename(
-                    title="Select Excel File",
-                    filetypes=[("Excel files", "*.xlsx;*.xls"), ("All files", "*.*")],
-                    initialdir=excel_dir  # Set initial directory to excel_files folder
-                )
-                
-                if file_path:
-                    # Always use the excel_files folder reference format
-                    file_name = os.path.basename(file_path)
-                    rel_path = os.path.join("excel_files", file_name)
-                    
-                    # Set the path and load sheets
-                    self.excel_file_var.set(rel_path)
-                    self.load_excel_sheets()
-            
-            browse_button = ctk.CTkButton(file_frame, text="Browse", command=browse_file)
-            browse_button.pack(side="right", padx=5)
-            
-            # Sheet selection
-            sheet_frame = ctk.CTkFrame(self.param_frame)
-            sheet_frame.pack(fill="x", padx=10, pady=5)
-            
-            sheet_label = ctk.CTkLabel(sheet_frame, text="Sheet:")
-            sheet_label.pack(side="left", padx=5)
-            
-            self.sheet_menu = ctk.CTkOptionMenu(
-                sheet_frame,
-                variable=self.excel_sheet_var,
-                values=[""],
-                command=self.load_excel_columns
-            )
-            self.sheet_menu.pack(side="left", padx=5, fill="x", expand=True)
-            
-            # Add a cell selection header
-            cell_header_frame = ctk.CTkFrame(self.param_frame)
-            cell_header_frame.pack(fill="x", padx=10, pady=(10, 0))
-            
-            cell_header = ctk.CTkLabel(cell_header_frame, text="Cell Selection:", font=ctk.CTkFont(weight="bold"))
-            cell_header.pack(anchor="w", padx=5)
-            
-            cell_info = ctk.CTkLabel(cell_header_frame, text="Select the cell to edit by choosing a column and row number")
-            cell_info.pack(anchor="w", padx=5, pady=(0, 5))
-            
-            # Column selection
-            column_frame = ctk.CTkFrame(self.param_frame)
-            column_frame.pack(fill="x", padx=10, pady=5)
-            
-            column_label = ctk.CTkLabel(column_frame, text="Column:")
-            column_label.pack(side="left", padx=5)
-            
-            self.column_menu = ctk.CTkOptionMenu(
-                column_frame,
-                variable=self.excel_column_var,
-                values=[""]
-            )
-            self.column_menu.pack(side="left", padx=5, fill="x", expand=True)
-            
-            # Row number selection
-            row_frame = ctk.CTkFrame(self.param_frame)
-            row_frame.pack(fill="x", padx=10, pady=5)
-            
-            row_label = ctk.CTkLabel(row_frame, text="Row Number:")
-            row_label.pack(side="left", padx=5)
-            
-            # Initialize row variable with existing value if editing
-            self.excel_row_var = tk.StringVar(
-                value=str(self.action.get("row", "1")) if self.action and "row" in self.action else "1"
-            )
-            row_entry = ctk.CTkEntry(row_frame, textvariable=self.excel_row_var, width=100)
-            row_entry.pack(side="left", padx=5)
-            
-            row_info = ctk.CTkLabel(row_frame, text="(Row number starts at 1)")
-            row_info.pack(side="left", padx=5)
-            
-            # Load sheets if a file is already specified
-            if self.excel_file_var.get():
-                self.load_excel_sheets()
     
-    def load_excel_sheets(self):
-        """Load sheets from the selected Excel file."""
-        file_path = self.excel_file_var.get()
-        if not file_path:
-            return
-        
-        try:
-            # Find the file using the helper method
-            file_path = self.find_excel_file(file_path)
-            
-            # Make sure the file exists
-            if not os.path.exists(file_path):
-                messagebox.showerror("Error", f"File not found: {self.excel_file_var.get()}\n\nPlease check if the file exists in the 'excel_files' folder.")
-                return
-            
-            # Load Excel file and get sheet names
-            excel = pd.ExcelFile(file_path)
-            self.sheets_list = excel.sheet_names
-            
-            # Update the sheet dropdown
-            self.sheet_menu.configure(values=self.sheets_list)
-            
-            # If there's only one sheet, select it automatically
-            if len(self.sheets_list) == 1:
-                self.excel_sheet_var.set(self.sheets_list[0])
-                self.load_excel_columns()
-            # If the previously selected sheet exists in the new file, keep it selected
-            elif self.excel_sheet_var.get() in self.sheets_list:
-                self.load_excel_columns()
-            # Otherwise, clear the sheet selection
-            else:
-                self.excel_sheet_var.set("")
-                self.excel_column_var.set("")
-                self.column_menu.configure(values=[""])
-                
-        except Exception as e:
-            messagebox.showerror("Error", f"Failed to load Excel file: {str(e)}")
-            self.sheets_list = []
-            self.sheet_menu.configure(values=[""])
-            self.excel_sheet_var.set("")
-            self.excel_column_var.set("")
-            self.column_menu.configure(values=[""])
-    
-    def load_excel_columns(self, *args):
-        """Load columns from the selected sheet."""
-        file_path = self.excel_file_var.get()
-        sheet_name = self.excel_sheet_var.get()
-        
-        if not file_path or not sheet_name:
-            self.columns_list = []
-            self.column_menu.configure(values=[""])
-            self.excel_column_var.set("")
-            return
-        
-        try:
-            # Find the file using the helper method
-            file_path = self.find_excel_file(file_path)
-            
-            # Load Excel file and get column names
-            df = pd.read_excel(file_path, sheet_name=sheet_name)
-            self.columns_list = df.columns.tolist()
-            
-            # Update the column dropdown
-            self.column_menu.configure(values=self.columns_list)
-            
-            # If the previously selected column exists in the new sheet, keep it selected
-            if self.excel_column_var.get() not in self.columns_list:
-                self.excel_column_var.set("")
-                
-        except Exception as e:
-            messagebox.showerror("Error", f"Failed to load columns: {str(e)}")
-            self.columns_list = []
-            self.column_menu.configure(values=[""])
-            self.excel_column_var.set("")
-
     def save_action(self):
         """Save the action and close the dialog."""
         action_type = self.type_var.get()
@@ -412,28 +198,6 @@ class ActionEditor:
                 return
         elif action_type in ["click", "double_click"]:
             new_action["button"] = self.button_var.get()
-        elif action_type == "excel":
-            # Validate Excel parameters
-            if not self.excel_file_var.get():
-                messagebox.showwarning("Warning", "Please select an Excel file.")
-                return
-            if not self.excel_sheet_var.get():
-                messagebox.showwarning("Warning", "Please select a sheet.")
-                return
-            if not self.excel_column_var.get():
-                messagebox.showwarning("Warning", "Please select a column.")
-                return
-            try:
-                new_action["row"] = int(self.excel_row_var.get())
-                if new_action["row"] < 1:
-                    raise ValueError("Row number must be 1 or greater.")
-            except ValueError:
-                messagebox.showwarning("Warning", "Please enter a valid row number (1 or greater).")
-                return
-                
-            new_action["file"] = self.excel_file_var.get()
-            new_action["sheet"] = self.excel_sheet_var.get()
-            new_action["column"] = self.excel_column_var.get()
         
         # Call the callback with the new action
         if self.callback:

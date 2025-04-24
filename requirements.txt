@@ -7,5 +7,3 @@ keyboard
 mss
 customtkinter
 pillow
-pandas
-openpyxl
