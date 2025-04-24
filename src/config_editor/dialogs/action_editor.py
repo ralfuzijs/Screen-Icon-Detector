@@ -31,17 +31,6 @@ class ActionEditor:
         self.window.minsize(400, 300)
         self.window.grab_set()  # Make window modal
         
-        # Initialize variables for Excel action
-        self.excel_mode_var = tk.StringVar(value="search_data")  # Default mode
-        self.excel_start_row_var = None
-        self.excel_end_row_var = None
-        self.excel_use_last_filled_var = None
-        self.excel_target_column_var = None
-
-        # Initialize variables for scrollwheel action
-        self.scroll_direction_var = tk.StringVar(value="down")
-        self.scroll_amount_var = tk.StringVar(value="1")
-        
         # Set up the UI
         self.setup_ui()
     
@@ -56,7 +45,7 @@ class ActionEditor:
         
         self.action_types = [
             "move_mouse", "click", "double_click", "type_message", 
-            "press_key", "wait", "terminate_program", "excel", "scroll_wheel"
+            "press_key", "wait", "terminate_program", "excel"
         ]
         
         # Get current type if editing existing action
@@ -76,8 +65,8 @@ class ActionEditor:
         )
         self.type_menu.pack(side="left", padx=5)
         
-        # Frame for parameters - replace with scrollable frame
-        self.param_frame = ctk.CTkScrollableFrame(self.window)
+        # Frame for parameters
+        self.param_frame = ctk.CTkFrame(self.window)
         self.param_frame.pack(fill="both", expand=True, padx=10, pady=10)
         
         # Set up parameter variables
@@ -305,145 +294,26 @@ class ActionEditor:
             )
             self.column_menu.pack(side="left", padx=5, fill="x", expand=True)
             
-            # Row range selection
+            # Row number selection
             row_frame = ctk.CTkFrame(self.param_frame)
             row_frame.pack(fill="x", padx=10, pady=5)
             
-            # Start row input
-            start_row_label = ctk.CTkLabel(row_frame, text="Start Row:")
-            start_row_label.pack(side="left", padx=5)
+            row_label = ctk.CTkLabel(row_frame, text="Row Number:")
+            row_label.pack(side="left", padx=5)
             
-            self.excel_start_row_var = tk.StringVar(
-                value=str(self.action.get("start_row", "1")) if self.action and "start_row" in self.action else "1"
+            # Initialize row variable with existing value if editing
+            self.excel_row_var = tk.StringVar(
+                value=str(self.action.get("row", "1")) if self.action and "row" in self.action else "1"
             )
-            start_row_entry = ctk.CTkEntry(row_frame, textvariable=self.excel_start_row_var, width=60)
-            start_row_entry.pack(side="left", padx=5)
+            row_entry = ctk.CTkEntry(row_frame, textvariable=self.excel_row_var, width=100)
+            row_entry.pack(side="left", padx=5)
             
-            # End row input
-            end_row_label = ctk.CTkLabel(row_frame, text="End Row:")
-            end_row_label.pack(side="left", padx=5)
-            
-            self.excel_end_row_var = tk.StringVar(
-                value=str(self.action.get("end_row", "5")) if self.action and "end_row" in self.action else "5"
-            )
-            end_row_entry = ctk.CTkEntry(row_frame, textvariable=self.excel_end_row_var, width=60)
-            end_row_entry.pack(side="left", padx=5)
-            
-            # Checkbox for "last filled entry"
-            self.excel_use_last_filled_var = tk.BooleanVar(
-                value=self.action.get("use_last_filled", False) if self.action else False
-            )
-            use_last_filled_checkbox = ctk.CTkCheckBox(
-                row_frame, 
-                text="Use last filled entry", 
-                variable=self.excel_use_last_filled_var,
-                command=lambda: end_row_entry.configure(state="disabled" if self.excel_use_last_filled_var.get() else "normal")
-            )
-            use_last_filled_checkbox.pack(side="left", padx=15)
-            
-            # Update end_row state based on checkbox
-            end_row_entry.configure(state="disabled" if self.excel_use_last_filled_var.get() else "normal")
-            
-            # Operation type frame
-            mode_frame = ctk.CTkFrame(self.param_frame)
-            mode_frame.pack(fill="x", padx=10, pady=5)
-            
-            mode_label = ctk.CTkLabel(mode_frame, text="Operation Mode:", font=ctk.CTkFont(weight="bold"))
-            mode_label.pack(anchor="w", padx=5, pady=(5, 0))
-            
-            # Radio buttons for operation mode
-            modes = [
-                ("Extract data from Excel (to memory)", "extract_data"),
-                ("Perform Google search on memory data", "search_data"),
-                ("Process first row only", "first_row_only")
-            ]
-            
-            self.excel_mode_var.set(self.action.get("mode", "extract_data") if self.action else "extract_data")
-            
-            for text, value in modes:
-                radio_btn = ctk.CTkRadioButton(
-                    mode_frame,
-                    text=text,
-                    variable=self.excel_mode_var,
-                    value=value
-                )
-                radio_btn.pack(anchor="w", padx=20, pady=2)
-            
-            # Target column for search results (only shown for search mode)
-            def update_target_visibility(*args):
-                if self.excel_mode_var.get() == "search_data":
-                    target_frame.pack(fill="x", padx=10, pady=5)
-                else:
-                    target_frame.pack_forget()
-            
-            self.excel_mode_var.trace_add("write", update_target_visibility)
-            
-            target_frame = ctk.CTkFrame(self.param_frame)
-            
-            target_header = ctk.CTkLabel(target_frame, text="Search Results Target:", font=ctk.CTkFont(weight="bold"))
-            target_header.pack(anchor="w", padx=5, pady=(5, 0))
-            
-            target_column_frame = ctk.CTkFrame(target_frame)
-            target_column_frame.pack(fill="x", padx=10, pady=5)
-            
-            target_column_label = ctk.CTkLabel(target_column_frame, text="Target Column:")
-            target_column_label.pack(side="left", padx=5)
-            
-            self.excel_target_column_var = tk.StringVar(
-                value=self.action.get("target_column", "") if self.action and "target_column" in self.action else ""
-            )
-            
-            self.target_column_menu = ctk.CTkOptionMenu(
-                target_column_frame,
-                variable=self.excel_target_column_var,
-                values=self.columns_list if hasattr(self, "columns_list") else [""]
-            )
-            self.target_column_menu.pack(side="left", padx=5, fill="x", expand=True)
-            
-            # Show/hide target frame based on current mode
-            update_target_visibility()
+            row_info = ctk.CTkLabel(row_frame, text="(Row number starts at 1)")
+            row_info.pack(side="left", padx=5)
             
             # Load sheets if a file is already specified
             if self.excel_file_var.get():
                 self.load_excel_sheets()
-        
-        elif action_type == "scroll_wheel":
-            # Initialize with existing values if editing
-            if self.action and isinstance(self.action, dict):
-                if "direction" in self.action:
-                    self.scroll_direction_var.set(self.action["direction"])
-                if "amount" in self.action:
-                    self.scroll_amount_var.set(str(self.action["amount"]))
-            
-            # Direction selection
-            direction_frame = ctk.CTkFrame(self.param_frame)
-            direction_frame.pack(fill="x", padx=10, pady=5)
-            
-            direction_label = ctk.CTkLabel(direction_frame, text="Scroll Direction:")
-            direction_label.pack(side="left", padx=5)
-            
-            # Radio buttons for direction
-            for direction in ["up", "down"]:
-                direction_radio = ctk.CTkRadioButton(
-                    direction_frame,
-                    text=direction,
-                    variable=self.scroll_direction_var,
-                    value=direction
-                )
-                direction_radio.pack(side="left", padx=10)
-            
-            # Amount selection
-            amount_frame = ctk.CTkFrame(self.param_frame)
-            amount_frame.pack(fill="x", padx=10, pady=5)
-            
-            amount_label = ctk.CTkLabel(amount_frame, text="Scroll Amount:")
-            amount_label.pack(side="left", padx=5)
-            
-            amount_entry = ctk.CTkEntry(amount_frame, textvariable=self.scroll_amount_var, width=100)
-            amount_entry.pack(side="left", padx=5)
-            
-            amount_info = ctk.CTkLabel(amount_frame, text="(Number of 'clicks' to scroll)")
-            amount_info.pack(side="left", padx=5)
     
     def load_excel_sheets(self):
         """Load sheets from the selected Excel file."""
@@ -507,10 +377,8 @@ class ActionEditor:
             df = pd.read_excel(file_path, sheet_name=sheet_name)
             self.columns_list = df.columns.tolist()
             
-            # Update both column dropdowns
+            # Update the column dropdown
             self.column_menu.configure(values=self.columns_list)
-            if hasattr(self, "target_column_menu"):
-                self.target_column_menu.configure(values=self.columns_list)
             
             # If the previously selected column exists in the new sheet, keep it selected
             if self.excel_column_var.get() not in self.columns_list:
@@ -555,53 +423,17 @@ class ActionEditor:
             if not self.excel_column_var.get():
                 messagebox.showwarning("Warning", "Please select a column.")
                 return
-            
             try:
-                # Validate start row
-                start_row = int(self.excel_start_row_var.get())
-                if start_row < 1:
-                    raise ValueError("Start row must be 1 or greater.")
-                    
-                # Validate end row if not using last filled
-                if not self.excel_use_last_filled_var.get():
-                    end_row = int(self.excel_end_row_var.get())
-                    if end_row < start_row:
-                        raise ValueError("End row must be greater than or equal to start row.")
-                
-                # For search mode, validate target column
-                if self.excel_mode_var.get() == "search_data" and not self.excel_target_column_var.get():
-                    messagebox.showwarning("Warning", "Please select a target column for search results.")
-                    return
-                    
-            except ValueError as e:
-                messagebox.showwarning("Warning", str(e))
+                new_action["row"] = int(self.excel_row_var.get())
+                if new_action["row"] < 1:
+                    raise ValueError("Row number must be 1 or greater.")
+            except ValueError:
+                messagebox.showwarning("Warning", "Please enter a valid row number (1 or greater).")
                 return
                 
-            # Store all Excel parameters
             new_action["file"] = self.excel_file_var.get()
             new_action["sheet"] = self.excel_sheet_var.get()
             new_action["column"] = self.excel_column_var.get()
-            new_action["start_row"] = int(self.excel_start_row_var.get())
-            new_action["use_last_filled"] = self.excel_use_last_filled_var.get()
-            
-            if not self.excel_use_last_filled_var.get():
-                new_action["end_row"] = int(self.excel_end_row_var.get())
-            
-            new_action["mode"] = self.excel_mode_var.get()
-            
-            if self.excel_mode_var.get() == "search_data":
-                new_action["target_column"] = self.excel_target_column_var.get()
-        
-        elif action_type == "scroll_wheel":
-            new_action["direction"] = self.scroll_direction_var.get()
-            try:
-                amount = int(self.scroll_amount_var.get())
-                if amount <= 0:
-                    raise ValueError("Scroll amount must be positive")
-                new_action["amount"] = amount
-            except ValueError:
-                messagebox.showwarning("Warning", "Please enter a valid positive number for scroll amount.")
-                return
         
         # Call the callback with the new action
         if self.callback:
