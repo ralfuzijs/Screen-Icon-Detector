@@ -451,20 +451,19 @@ def perform_actions(screenshot_path, match_coordinates, actions, action_performe
                 action_performer.type_message(action.get('message', ''))
             elif action_type == "press_key":
                 action_performer.press_key(action.get('key', 'enter'))
-                # Capture a new screenshot after pressing enter as it might change the screen
-                if action.get('key', '') in ['enter', 'return']:
-                    current_screenshot = capture_screenshot(screenshot_path)
             elif action_type == "wait":
-                seconds = action.get('seconds', 1)
-                # Break the wait into smaller chunks to check kill switch more frequently
-                for _ in range(int(seconds)):
-                    time.sleep(1)
-                    check_kill_switch()
-                # Handle remaining fraction of a second
-                remaining = seconds - int(seconds)
-                if remaining > 0:
-                    time.sleep(remaining)
-                    check_kill_switch()
+                wait_seconds = float(action.get('seconds', 1.0))
+                print(f"Waiting for {wait_seconds} seconds...")
+                time.sleep(wait_seconds)
+            elif action_type == "terminate_program":
+                kill_switch_activated = True
+                return False
+            elif action_type == "excel":
+                action_performer.handle_excel(
+                    action.get('file', ''),
+                    action.get('sheet', ''),
+                    action.get('column', '')
+                )
 
     return current_screenshot
 

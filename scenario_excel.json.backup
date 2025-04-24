@@ -1,0 +1,123 @@
+{
+  "templates": [
+    {
+      "name": "MS Teams Icon",
+      "paths": [
+        "templates/laptop_test/laptop0.png",
+        "templates/laptop_test/laptop1.png"
+      ],
+      "methods": [
+        "TM_CCOEFF_NORMED",
+        "TM_CCORR_NORMED",
+        "TM_SQDIFF_NORMED"
+      ],
+      "enabled": true,
+      "actions": [
+        {
+          "type": "move_mouse"
+        },
+        {
+          "type": "click"
+        },
+        {
+          "type": "wait",
+          "seconds": 3.0
+        }
+      ]
+    },
+    {
+      "name": "MS Teams Person",
+      "paths": [
+        "templates/laptop_test/laptop2.png",
+        "templates/laptop_test/laptop4.png"
+      ],
+      "methods": [
+        "TM_CCOEFF_NORMED",
+        "TM_CCORR_NORMED",
+        "TM_SQDIFF_NORMED"
+      ],
+      "enabled": true,
+      "depends_on": "MS Teams Icon",
+      "actions": [
+        {
+          "type": "move_mouse"
+        },
+        {
+          "type": "click"
+        },
+        {
+          "type": "wait",
+          "seconds": 1
+        },
+        {
+          "type": "type_message",
+          "message": "Dricele. Ricele. Licele."
+        },
+        {
+          "type": "press_key",
+          "key": "enter"
+        },
+        {
+          "type": "wait",
+          "seconds": 2
+        },
+        {
+          "type": "type_message",
+          "message": ""
+        }
+      ]
+    },
+    {
+      "name": "Close Button",
+      "methods": [
+        "TM_CCOEFF_NORMED",
+        "TM_SQDIFF_NORMED"
+      ],
+      "enabled": true,
+      "depends_on": "MS Teams Person",
+      "actions": [
+        {
+          "type": "move_mouse"
+        },
+        {
+          "type": "click"
+        },
+        {
+          "type": "wait",
+          "seconds": 3.0
+        }
+      ],
+      "paths": [
+        "templates/laptop_test/laptop3.png"
+      ]
+    }
+  ],
+  "screenshot_interval": 10,
+  "max_loops": 1,
+  "visualizer_enabled": true,
+  "default_template_methods": [
+    "TM_CCOEFF_NORMED",
+    "TM_CCORR_NORMED",
+    "TM_SQDIFF_NORMED"
+  ],
+  "match_threshold": 0.75,
+  "match_distance_pixels_threshold": 50,
+  "show_failed_matches": true,
+  "process_one_template_per_iteration": false,
+  "monitor_settings": {
+    "enable_monitor_selection": true,
+    "default_monitor_index": 0
+  },
+  "action_settings": {
+    "smooth_mouse_movement": true,
+    "mouse_move_duration": 0.5,
+    "click_delay": 0.2,
+    "type_delay": 0.05,
+    "post_action_delay": 0.3,
+    "pyautogui_pause": 0.1,
+    "typing_method": "clipboard",
+    "hybrid_visibility_chars": 5
+  },
+  "font_color": "Black",
+  "appearance_mode": "Dark"
+}
